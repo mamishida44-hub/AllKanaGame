@@ -144,7 +144,7 @@ function play(){
 function buzz(){
   if(!audioCtx) return;
   const o = audioCtx.createOscillator();
-  const g = audioCtx.reateGain();
+  const g = audioCtx.createGain();
   
   o.type = "square";
   o.frequency.value = 120;
