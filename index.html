@@ -109,6 +109,7 @@ function next(){
 
   const q=shuffle(choices).slice(0,9);
   if(!q.includes(answer)) q[0]=answer;
+  shuffle(q);//
 
   const area=document.getElementById("choices");
   area.innerHTML="";
