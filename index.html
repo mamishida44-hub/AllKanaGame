@@ -11,74 +11,81 @@ button{font-size:18px;padding:10px 16px;margin:6px}
 .choices{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;max-width:520px;margin:20px auto}
 .choice{font-size:28px;padding:14px 0}
 .top{display:flex;justify-content:space-between;max-width:520px;margin:auto}
-#overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);color:#fff;display:none;
-align-items:center;justify-content:center;flex-direction:column}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);color:#fff;
+display:none;align-items:center;justify-content:center;flex-direction:column}
 </style>
 </head>
 <body>
 
+<!-- ===== スタート ===== -->
 <div id="start">
-  <h2>もじを えらんでね</h2>
+  <h3>もじ</h3>
   <button onclick="setMode('hira')">ひらがな</button>
   <button onclick="setMode('kata')">カタカナ</button>
 
-  <h2>じかん</h2>
+  <h3>じかん</h3>
   <button onclick="start(60)">1ぷん</button>
-  <button onclick="start(120)">2ぷん</button>
+  <button onclick="start(120)">2ふん</button>
   <button onclick="start(null)">じかんなし</button>
 </div>
 
+<!-- ===== ゲーム ===== -->
 <div id="game" style="display:none">
   <div class="top">
     <div>⏱ <span id="time">∞</span></div>
     <div>⭐ <span id="score">0</span></div>
   </div>
+
   <button onclick="play()">🔊 もういちど</button>
   <div class="choices" id="choices"></div>
 </div>
 
+<!-- ===== 終了 ===== -->
 <div id="overlay">
   <h2>おわり</h2>
-  <p>スコア: <span id="final"></span></p>
+  <p>スコア：<span id="final"></span></p>
   <button onclick="location.reload()">もどる</button>
 </div>
 
 <script>
-/* ===== 共通データ ===== */
-const map = {
-  a:["あ","ア"], i:["い","イ"], u:["う","ウ"], e:["え","エ"], o:["お","オ"],
-  ka:["か","カ"], ki:["き","キ"], ku:["く","ク"], ke:["け","ケ"], ko:["こ","コ"],
-  sa:["さ","サ"], shi:["し","シ"], su:["す","ス"], se:["せ","セ"], so:["そ","ソ"],
-  ta:["た","タ"], chi:["ち","チ"], tsu:["つ","ツ"], te:["て","テ"], to:["と","ト"],
-  na:["な","ナ"], ni:["に","ニ"], nu:["ぬ","ヌ"], ne:["ね","ネ"], no:["の","ノ"],
-  ha:["は","ハ"], hi:["ひ","ヒ"], fu:["ふ","フ"], he:["へ","ヘ"], ho:["ほ","ホ"],
-  ma:["ま","マ"], mi:["み","ミ"], mu:["む","ム"], me:["め","メ"], mo:["も","モ"],
-  ya:["や","ヤ"], yu:["ゆ","ユ"], yo:["よ","ヨ"],
-  ra:["ら","ラ"], ri:["り","リ"], ru:["る","ル"], re:["れ","レ"], ro:["ろ","ロ"],
-  wa:["わ","ワ"], wo:["を","ヲ"], n:["ん","ン"],
-  ga:["が","ガ"], gi:["ぎ","ギ"], gu:["ぐ","グ"], ge:["げ","ゲ"], go:["ご","ゴ"],
-  za:["ざ","ザ"], ji:["じ","ジ"], zu:["ず","ズ"], ze:["ぜ","ゼ"], zo:["ぞ","ゾ"],
-  da:["だ","ダ"], de:["で","デ"], do:["ど","ド"],
-  ba:["ば","バ"], bi:["び","ビ"], bu:["ぶ","ブ"], be:["べ","ベ"], bo:["ぼ","ボ"],
-  pa:["ぱ","パ"], pi:["ぴ","ピ"], pu:["ぷ","プ"], pe:["ぺ","ペ"], po:["ぽ","ポ"]
-};
-
-const sameSound = [
-    ["o","wo"]
+/* ===== データ ===== */
+const data = [
+  ["a","あ","ア"],["i","い","イ"],["u","う","ウ"],["e","え","エ"],["o","お","オ"],
+  ["ka","か","カ"],["ki","き","キ"],["ku","く","ク"],["ke","け","ケ"],["ko","こ","コ"],
+  ["sa","さ","サ"],["shi","し","シ"],["su","す","ス"],["se","せ","セ"],["so","そ","ソ"],
+  ["ta","た","タ"],["chi","ち","チ"],["tsu","つ","ツ"],["te","て","テ"],["to","と","ト"],
+  ["na","な","ナ"],["ni","に","ニ"],["nu","ぬ","ヌ"],["ne","ね","ネ"],["no","の","ノ"],
+  ["ha","は","ハ"],["hi","ひ","ヒ"],["fu","ふ","フ"],["he","へ","ヘ"],["ho","ほ","ホ"],
+  ["ma","ま","マ"],["mi","み","ミ"],["mu","む","ム"],["me","め","メ"],["mo","も","モ"],
+  ["ya","や","ヤ"],["yu","ゆ","ユ"],["yo","よ","ヨ"],
+  ["ra","ら","ラ"],["ri","り","リ"],["ru","る","ル"],["re","れ","レ"],["ro","ろ","ロ"],
+  ["wa","わ","ワ"],["wo","を","ヲ"],["n","ん","ン"],
+  ["ga","が","ガ"],["gi","ぎ","ギ"],["gu","ぐ","グ"],["ge","げ","ゲ"],["go","ご","ゴ"],
+  ["za","ざ","ザ"],["ji","じ","ジ"],["zu","ず","ズ"],["ze","ぜ","ゼ"],["zo","ぞ","ゾ"],
+  ["da","だ","ダ"],["de","で","デ"],["do","ど","ド"],
+  ["ba","ば","バ"],["bi","び","ビ"],["bu","ぶ","ブ"],["be","べ","ベ"],["bo","ぼ","ボ"],
+  ["pa","ぱ","パ"],["pi","ぴ","ピ"],["pu","ぷ","プ"],["pe","ぺ","ペ"],["po","ぽ","ポ"]
 ];
 
-let mode="hira", list=[], answer="", score=0, time=null, timer=null, audio=null;
+const sameSound = ["o","wo"]; // お／を
+
+let mode="hira", list=[], answer=null;
+let score=0, time=null, timer=null, audio=null;
 
 /* ===== モード ===== */
 function setMode(m){
   mode=m;
-  list=Object.entries(map).map(([r,k])=>({r, c:k[m==="hira"?0:1]}));
+  list=data.map(d=>({
+    r:d[0],
+    c: mode==="hira" ? d[1] : d[2]
+  }));
 }
 
 /* ===== 開始 ===== */
 function start(sec){
   document.getElementById("start").style.display="none";
   document.getElementById("game").style.display="block";
+
   score=0; time=sec;
   update();
   next(); play();
@@ -94,27 +101,31 @@ function start(sec){
 /* ===== 出題 ===== */
 function next(){
   answer=list[Math.floor(Math.random()*list.length)];
-  const banned = sameSound
-    .find(g => g.includes(answer.r)) || [];
-  const candidates = list.filter(o => !banned.includes(o,r));
-  const q=shuffle([...candidates]).slice(0,9);
+
+  const choices=list.filter(o=>{
+    if(!sameSound.includes(answer.r)) return true;
+    return !sameSound.includes(o.r) || o.r===answer.r;
+  });
+
+  const q=shuffle(choices).slice(0,9);
   if(!q.includes(answer)) q[0]=answer;
 
-  const c=document.getElementById("choices");
-  c.innerHTML="";
+  const area=document.getElementById("choices");
+  area.innerHTML="";
   q.forEach(o=>{
     const b=document.createElement("button");
     b.className="choice";
-    b.textContent=o.c;
+    b.textContent=o.c;   // ← ここで必ず文字が出る
     b.onclick=()=>check(o);
-    c.appendChild(b);
+    area.appendChild(b);
   });
 }
 
 /* ===== 判定 ===== */
 function check(o){
   if(o===answer){
-    score++; next(); play(); update();
+    score++; update();
+    next(); play();
   } else buzz();
 }
 
@@ -155,3 +166,4 @@ function shuffle(a){
 </script>
 </body>
 </html>
+
