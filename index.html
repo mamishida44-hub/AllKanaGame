@@ -48,6 +48,7 @@ display:none;align-items:center;justify-content:center;flex-direction:column}
 </div>
 
 <script>
+let audioCtx = null;
 /* ===== データ ===== */
 const data = [
   ["a","あ","ア"],["i","い","イ"],["u","う","ウ"],["e","え","エ"],["o","お","オ"],
@@ -83,6 +84,9 @@ function setMode(m){
 
 /* ===== 開始 ===== */
 function start(sec){
+  if (!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
   document.getElementById("start").style.display="none";
   document.getElementById("game").style.display="block";
 
@@ -138,10 +142,15 @@ function play(){
 }
 
 function buzz(){
-  const ctx=new AudioContext(), o=ctx.createOscillator(), g=ctx.createGain();
-  o.frequency.value=120; g.gain.value=.1;
-  o.connect(g); g.connect(ctx.destination);
-  o.start(); o.stop(ctx.currentTime+.15);
+  if(!audioCtx) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.reateGain();
+  
+  o.type = "square";
+  o.frequency.value = 120;
+  g.gain.value=.1;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime+.15);
 }
 
 /* ===== UI ===== */
